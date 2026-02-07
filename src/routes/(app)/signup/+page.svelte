@@ -14,6 +14,10 @@
 	);
 </script>
 
+<svelte:head>
+	<title>Sign Up - PriceTracker</title>
+</svelte:head>
+
 <ClerkLoaded>
 	<div class="my-10 flex justify-center">
 		<SignUp fallbackRedirectUrl={fallbackUrl} {signInUrl} />

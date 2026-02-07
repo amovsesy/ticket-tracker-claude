@@ -1,10 +1,9 @@
-import { Clerk } from '@clerk/clerk-js';
 import type { ClerkOptions } from '@clerk/types';
 import clerk from './store';
 
 export const DEFAULT_OPTIONS: ClerkOptions = {
-	signInFallbackRedirectUrl: '/',
-	signUpFallbackRedirectUrl: '/',
+	signInFallbackRedirectUrl: '/dashboard',
+	signUpFallbackRedirectUrl: '/dashboard',
 	signInUrl: '/login',
 	signUpUrl: '/signup'
 };
@@ -13,6 +12,13 @@ export default async function initializeClerkClient(
 	key: string,
 	options: ClerkOptions = DEFAULT_OPTIONS
 ): Promise<void> {
+	// Only run on client side
+	if (typeof window === 'undefined') {
+		return;
+	}
+
+	// Dynamic import to avoid SSR issues
+	const { Clerk } = await import('@clerk/clerk-js');
 	const instance = new Clerk(key);
 
 	await instance.load(options).catch((error: Error) => {

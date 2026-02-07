@@ -14,6 +14,10 @@
 	);
 </script>
 
+<svelte:head>
+	<title>Sign In - PriceTracker</title>
+</svelte:head>
+
 <ClerkLoaded>
 	<div class="my-10 flex justify-center">
 		<SignIn

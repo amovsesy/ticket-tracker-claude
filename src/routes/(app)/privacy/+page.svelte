@@ -1,10 +1,30 @@
 <script lang="ts">
-	const lastUpdated = 'May 15, 2025';
+	import Header from '$lib/components/Header.svelte';
+
+	const lastUpdated = 'February 6, 2026';
 </script>
 
-<div class="container mx-auto max-w-4xl px-4 py-8">
-	<h1 class="mb-6 text-3xl font-bold">Privacy Policy</h1>
-	<p class="mb-4 text-sm text-gray-500">Last Updated: {lastUpdated}</p>
+<svelte:head>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+		rel="stylesheet"
+	/>
+	<style>
+		.material-symbols-outlined {
+			font-variation-settings:
+				'FILL' 0,
+				'wght' 400,
+				'GRAD' 0,
+				'opsz' 24;
+		}
+	</style>
+</svelte:head>
+
+<div class="min-h-screen bg-[#f6f6f8]">
+	<Header />
+	<div class="container mx-auto max-w-4xl px-4 py-12">
+		<h1 class="mb-4 text-4xl font-black text-[#111218]">Privacy Policy</h1>
+		<p class="mb-8 text-sm font-medium text-[#616889]">Last Updated: {lastUpdated}</p>
 
 	<div class="space-y-6">
 		<section>
@@ -106,10 +126,11 @@
 			<h2 class="mb-3 text-xl font-semibold">Contact Us</h2>
 			<p>
 				If you have any questions about this Privacy Policy, please contact us at
-				<a href="mailto:privacy@ticketpriceinsights.com" class="text-indigo-600 hover:underline"
-					>privacy@ticketpriceinsights.com</a
+				<a href="mailto:privacy@pricetracker.com" class="text-primary hover:underline"
+					>privacy@pricetracker.com</a
 				>.
 			</p>
 		</section>
+	</div>
 	</div>
 </div>

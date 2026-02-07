@@ -6,9 +6,7 @@ type ClerkErrorWithReason = {
 	[key: string]: unknown;
 };
 
-type ProtectedPath =
-	| string
-	| ((event: RequestEvent<Partial<Record<string, string>>, string | null>) => boolean);
+type ProtectedPath = string | ((event: RequestEvent) => boolean);
 
 function debugLog(debug: boolean, message: string) {
 	if (debug) {

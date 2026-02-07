@@ -1,5 +1,27 @@
 {
-	"permissions": {
-		"allow": ["Bash(tree:*)", "Bash(ls:*)"]
-	}
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(ls:*)",
+      "mcp__jetbrains__list_directory_tree",
+      "mcp__jetbrains__get_file_text_by_path",
+      "Bash(wrangler d1 create:*)",
+      "Bash(test:*)",
+      "Bash(pnpm run db:generate:*)",
+      "Bash(wrangler d1 migrations apply:*)",
+      "Bash(pnpm run cf-typegen:*)",
+      "Bash(npx shadcn-svelte@latest init:*)",
+      "Bash(npx shadcn-svelte@latest add:*)",
+      "Bash(for component in card input label badge tabs separator avatar dropdown-menu switch select dialog toast)",
+      "Bash(do echo \"yes\")",
+      "Bash(done)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm run db:push:*)",
+      "Bash(pnpm run dev:*)",
+      "Bash(pnpm run check:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)"
+    ]
+  }
 }

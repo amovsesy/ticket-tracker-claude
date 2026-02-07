@@ -7,6 +7,11 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
+// Type utilities for shadcn-svelte components
+export type WithElementRef<T> = T & { ref?: HTMLElement | null };
+export type WithoutChildrenOrChild<T> = Omit<T, 'children' | 'child'>;
+export type WithoutChild<T> = Omit<T, 'child'>;
+
 type FlyAndScaleParams = {
 	y?: number;
 	x?: number;

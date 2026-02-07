@@ -1,5 +1,7 @@
 import { handleErrorWithSentry, replayIntegration } from '@sentry/sveltekit';
 import * as Sentry from '@sentry/sveltekit';
+import { PUBLIC_CLERK_PUBLISHABLE_KEY } from '$env/static/public';
+import { initializeClerkClient } from '$lib/components/clerk';
 
 Sentry.init({
 	dsn: 'https://e245c98d758b194934ab0fea862bbc1b@o4508550435766272.ingest.us.sentry.io/4508556699828224',
@@ -23,6 +25,14 @@ Sentry.init({
 	// Enable sending user PII (Personally Identifiable Information)
 	// https://docs.sentry.io/platforms/javascript/guides/sveltekit/configuration/options/#sendDefaultPii
 	sendDefaultPii: true
+});
+
+// Initialize Clerk client
+initializeClerkClient(PUBLIC_CLERK_PUBLISHABLE_KEY, {
+	signInFallbackRedirectUrl: '/dashboard',
+	signUpFallbackRedirectUrl: '/dashboard',
+	signInUrl: '/login',
+	signUpUrl: '/signup'
 });
 
 // If you have a custom error handler, pass it to `handleErrorWithSentry`
