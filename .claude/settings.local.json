@@ -21,7 +21,20 @@
       "Bash(pnpm run dev:*)",
       "Bash(pnpm run check:*)",
       "Bash(find:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git commit:*)",
+      "Bash(pnpm run lint:*)",
+      "Bash(printf:*)",
+      "Bash(sqlite3:*)",
+      "Bash(wrangler d1 execute:*)",
+      "Bash(pnpm dlx:*)",
+      "Bash(pnpm exec lint-staged:*)",
+      "Bash(git add:*)",
+      "Bash(npx eslint:*)",
+      "Bash(for file in \"src/lib/server/db/schema.ts\" \"src/lib/server/priceComparison.ts\" \"src/lib/server/notifications/email/templates.ts\" \"src/lib/server/notifications/notificationManager.ts\" \"src/lib/server/scrapers/stubhub.ts\" \"src/lib/components/ui/select/select-item.svelte\" \"src/lib/components/ui/select/select-trigger.svelte\" \"src/routes/\\(admin\\)/admin/events/+page.svelte\" \"src/routes/\\(admin\\)/admin/events/[id]/+page.svelte\" \"src/routes/\\(admin\\)/admin/notifications/+page.server.ts\" \"src/routes/\\(admin\\)/admin/notifications/send/+page.server.ts\" \"src/routes/\\(dashboard\\)/+layout.server.ts\" \"src/routes/\\(dashboard\\)/+layout.svelte\")",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

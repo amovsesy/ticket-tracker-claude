@@ -23,7 +23,7 @@ function createThemeStore() {
 	return {
 		subscribe,
 		toggle: () => {
-			update(current => {
+			update((current) => {
 				const next = current === 'light' ? 'dark' : 'light';
 				if (browser) {
 					localStorage.setItem('theme', next);

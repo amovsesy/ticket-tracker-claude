@@ -127,8 +127,10 @@
 			<h2 class="mb-3 text-xl font-semibold">Contact Us</h2>
 			<p>
 				If you have any questions about these Terms, please contact us at
-				<a href="mailto:legal@ticketpriceinsights.com" class="text-indigo-600 hover:underline"
-					>legal@ticketpriceinsights.com</a
+				<a
+					href="mailto:legal@ticketpriceinsights.com"
+					data-sveltekit-preload-data
+					class="text-indigo-600 hover:underline">legal@ticketpriceinsights.com</a
 				>.
 			</p>
 		</section>

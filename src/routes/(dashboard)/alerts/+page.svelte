@@ -1,44 +1,12 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import FilterChip from '$lib/components/shared/FilterChip.svelte';
+	import Alert from '$lib/components/shared/Alert.svelte';
+	import type { PageData } from './$types';
 
-	// Mock alert data
-	const alerts = [
-		{
-			id: 1,
-			type: 'price_drop',
-			eventName: 'Taylor Swift | The Eras Tour',
-			venue: 'BC Place, Vancouver',
-			section: 'Floor Section A',
-			oldPrice: 450,
-			newPrice: 389,
-			targetPrice: 400,
-			timestamp: new Date('2026-02-06T10:30:00'),
-			isNew: true
-		},
-		{
-			id: 2,
-			type: 'price_drop',
-			eventName: 'The Weeknd - After Hours Til Dawn',
-			venue: 'Rogers Arena, Vancouver',
-			section: 'Lower Bowl 102',
-			oldPrice: 285,
-			newPrice: 249,
-			targetPrice: 300,
-			timestamp: new Date('2026-02-05T15:45:00'),
-			isNew: false
-		},
-		{
-			id: 3,
-			type: 'target_reached',
-			eventName: 'Drake - It\'s All a Blur Tour',
-			venue: 'Climate Pledge Arena, Seattle',
-			section: 'Upper Bowl 201',
-			newPrice: 175,
-			targetPrice: 200,
-			timestamp: new Date('2026-02-04T09:20:00'),
-			isNew: false
-		}
-	];
+	let { data }: { data: PageData } = $props();
+
+	let activeFilter = $state<'all' | 'price_drop' | 'target_reached'>('all');
 
 	function formatDate(date: Date) {
 		const now = new Date();
@@ -63,6 +31,13 @@
 			minimumFractionDigits: 0
 		}).format(price);
 	}
+
+	// Filter alerts based on active filter
+	const filteredAlerts = $derived(
+		activeFilter === 'all'
+			? data.alerts
+			: data.alerts.filter((alert) => alert.type === activeFilter)
+	);
 </script>
 
 <svelte:head>
@@ -70,47 +45,53 @@
 </svelte:head>
 
 <div class="mx-auto w-full max-w-7xl px-4 pb-24">
+	<!-- Demo Mode Indicator -->
+	{#if data.isDemoMode}
+		<div class="mb-4">
+			<Alert variant="warning" icon="🎭" title="Demo Mode Active">
+				You are viewing sample alert data. This is not real notification history.
+			</Alert>
+		</div>
+	{/if}
+
 	<!-- Header -->
 	<div class="mb-6 flex items-center justify-between">
 		<div>
 			<h1 class="text-3xl font-black text-[#111218]">Price Alerts</h1>
 			<p class="mt-1 text-sm text-[#616889]">Your notification history</p>
 		</div>
-		<button
-			type="button"
-			onclick={() => goto('/settings')}
+		<a
+			href={resolve('/settings')}
+			data-sveltekit-preload-data
 			class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-[#616889] transition-colors hover:bg-gray-100"
 		>
 			<span class="material-symbols-outlined text-[20px]">settings</span>
 			Settings
-		</button>
+		</a>
 	</div>
 
 	<!-- Filter Tabs -->
 	<div class="mb-6 flex gap-2 overflow-x-auto">
-		<button
-			type="button"
-			class="flex h-9 shrink-0 items-center justify-center gap-x-1 rounded-full bg-primary px-4 text-xs font-semibold text-white"
+		<FilterChip active={activeFilter === 'all'} onclick={() => (activeFilter = 'all')}>
+			All Alerts
+		</FilterChip>
+		<FilterChip
+			active={activeFilter === 'price_drop'}
+			onclick={() => (activeFilter = 'price_drop')}
 		>
-			<span>All Alerts</span>
-		</button>
-		<button
-			type="button"
-			class="flex h-9 shrink-0 items-center justify-center gap-x-1 rounded-full border border-[#dbdde6] bg-white px-4 text-xs font-medium text-[#111218]"
+			Price Drops
+		</FilterChip>
+		<FilterChip
+			active={activeFilter === 'target_reached'}
+			onclick={() => (activeFilter = 'target_reached')}
 		>
-			<span>Price Drops</span>
-		</button>
-		<button
-			type="button"
-			class="flex h-9 shrink-0 items-center justify-center gap-x-1 rounded-full border border-[#dbdde6] bg-white px-4 text-xs font-medium text-[#111218]"
-		>
-			<span>Target Reached</span>
-		</button>
+			Target Reached
+		</FilterChip>
 	</div>
 
 	<!-- Alerts List -->
 	<div class="space-y-3">
-		{#each alerts as alert (alert.id)}
+		{#each filteredAlerts as alert (alert.id)}
 			<div class="overflow-hidden rounded-xl bg-white shadow-sm transition-all hover:shadow-md">
 				<div class="flex items-start gap-4 p-4">
 					<!-- Icon -->
@@ -131,14 +112,14 @@
 							<h3 class="font-bold text-[#111218]">{alert.eventName}</h3>
 							{#if alert.isNew}
 								<span
-									class="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
+									class="rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold tracking-wider text-white uppercase"
 								>
 									New
 								</span>
 							{/if}
 						</div>
 						<p class="mb-2 text-sm text-[#616889]">{alert.venue}</p>
-						<p class="mb-3 text-xs font-medium uppercase tracking-wider text-primary">
+						<p class="text-primary mb-3 text-xs font-medium tracking-wider uppercase">
 							{alert.section}
 						</p>
 
@@ -170,39 +151,37 @@
 						<!-- Footer -->
 						<div class="flex items-center justify-between border-t border-gray-50 pt-3">
 							<span class="text-xs text-[#616889]">{formatDate(alert.timestamp)}</span>
-							<button
-								type="button"
-								onclick={() => goto(`/events/${alert.id}`)}
-								class="flex items-center gap-1 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+							<a
+								href={resolve(`/events/${alert.id}`)}
+								data-sveltekit-preload-data
+								class="text-primary hover:text-primary/80 flex items-center gap-1 text-sm font-semibold transition-colors"
 							>
 								View Event
 								<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-							</button>
+							</a>
 						</div>
 					</div>
 				</div>
 			</div>
+		{:else}
+			<!-- Empty State -->
+			<div class="flex flex-col items-center justify-center py-16 text-center">
+				<div class="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-[#f6f6f8]">
+					<span class="material-symbols-outlined text-5xl text-[#616889]">notifications_off</span>
+				</div>
+				<h3 class="mb-2 text-2xl font-black text-[#111218]">No alerts yet</h3>
+				<p class="mb-6 max-w-md text-sm text-[#616889]">
+					Start tracking events and you'll see price drop notifications here.
+				</p>
+				<a
+					href={resolve('/add')}
+					data-sveltekit-preload-data
+					class="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
+				>
+					<span class="material-symbols-outlined">add</span>
+					Track Your First Event
+				</a>
+			</div>
 		{/each}
 	</div>
-
-	<!-- Empty State (hidden when there are alerts) -->
-	<!--
-	<div class="flex flex-col items-center justify-center py-16 text-center">
-		<div class="mb-4 flex size-20 items-center justify-center rounded-full bg-gray-100">
-			<span class="material-symbols-outlined text-4xl text-gray-400">notifications_off</span>
-		</div>
-		<h3 class="mb-2 text-xl font-bold text-[#111218]">No alerts yet</h3>
-		<p class="mb-6 max-w-sm text-sm text-[#616889]">
-			Start tracking events and you'll see price drop notifications here.
-		</p>
-		<button
-			type="button"
-			onclick={() => goto('/add')}
-			class="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-white transition-colors hover:bg-primary/90"
-		>
-			<span class="material-symbols-outlined">add</span>
-			Track Your First Event
-		</button>
-	</div>
-	-->
 </div>

@@ -14,6 +14,11 @@ declare global {
 		interface Platform {
 			env: {
 				DB: D1Database;
+				RESEND_API_KEY?: string;
+				PLIVO_AUTH_ID?: string;
+				PLIVO_AUTH_TOKEN?: string;
+				PLIVO_PHONE_NUMBER?: string;
+				STATSIG_SERVER_KEY?: string;
 			} & Env;
 			cf: CfProperties;
 			ctx: ExecutionContext;

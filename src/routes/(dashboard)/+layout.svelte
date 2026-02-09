@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
+	import type { Snippet } from 'svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Navigation from '$lib/components/Navigation.svelte';
+	import ImpersonationBanner from '$lib/components/ImpersonationBanner.svelte';
+	import type { LayoutData } from './$types';
 
-	let { children } = $props();
+	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 </script>
 
 <svelte:head>
@@ -23,6 +25,11 @@
 </svelte:head>
 
 <div class="relative min-h-screen bg-[#f6f6f8]">
+	<!-- Impersonation Banner (if active) -->
+	{#if data?.impersonating}
+		<ImpersonationBanner userEmail={data.impersonating.targetEmail} />
+	{/if}
+
 	<Header />
 
 	<!-- Main content area with sidebar offset on desktop -->
@@ -30,5 +37,5 @@
 		{@render children()}
 	</main>
 
-	<Navigation />
+	<Navigation isAdmin={data?.isAdmin || false} />
 </div>

@@ -48,10 +48,13 @@ Feel free to delete this file and the entire sentry route.
 		<p class="description">
 			Click the button below, and view the sample error on the Sentry <a
 				target="_blank"
-				href="https://movsfam.sentry.io/issues/?project=4508556699828224">Issues Page</a
+				href="https://movsfam.sentry.io/issues/?project=4508556699828224"
+				data-sveltekit-preload-data>Issues Page</a
 			>. For more details about setting up Sentry,
-			<a target="_blank" href="https://docs.sentry.io/platforms/javascript/guides/sveltekit/"
-				>read our docs</a
+			<a
+				target="_blank"
+				href="https://docs.sentry.io/platforms/javascript/guides/sveltekit/"
+				data-sveltekit-preload-data>read our docs</a
 			>.
 		</p>
 

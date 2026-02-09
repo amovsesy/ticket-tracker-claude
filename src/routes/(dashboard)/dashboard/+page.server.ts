@@ -1,75 +1,115 @@
+import { getDb } from '$lib/server/db';
+import { users, trackedEvents, events } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
+import { isDemoModeEnabled } from '$lib/server/demoMode';
+import { generateMockEvents } from '$lib/server/mockData';
 import type { PageServerLoad } from './$types';
 
-// Mock data for tracked events
-const mockTrackedEvents = [
-	{
-		id: 1,
-		eventName: 'Taylor Swift | The Eras Tour',
-		venue: 'SoFi Stadium',
-		location: 'Los Angeles, CA',
-		date: new Date('2024-08-08T19:00:00'),
-		category: 'concerts',
-		imageUrl: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&h=300&fit=crop',
-		section: 'Floor A',
-		targetPrice: 450.0,
-		currentLowestPrice: 389.0,
-		percentageChange: -13.6,
-		lastChecked: new Date('2024-02-06T12:30:00'),
-		priceHistory: [420, 415, 410, 405, 398, 392, 389] // Last 7 data points
-	},
-	{
-		id: 2,
-		eventName: 'Los Angeles Lakers vs Golden State Warriors',
-		venue: 'Crypto.com Arena',
-		location: 'Los Angeles, CA',
-		date: new Date('2024-03-15T19:30:00'),
-		category: 'sports',
-		imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&h=300&fit=crop',
-		section: 'Lower Bowl',
-		targetPrice: 200.0,
-		currentLowestPrice: 245.0,
-		percentageChange: 2.1,
-		lastChecked: new Date('2024-02-06T12:15:00'),
-		priceHistory: [260, 255, 250, 248, 242, 240, 245]
-	},
-	{
-		id: 3,
-		eventName: 'Hamilton',
-		venue: 'Pantages Theatre',
-		location: 'Hollywood, CA',
-		date: new Date('2024-04-20T20:00:00'),
-		category: 'theater',
-		imageUrl: 'https://images.unsplash.com/photo-1503095396549-807759245b35?w=400&h=300&fit=crop',
-		section: 'Orchestra',
-		targetPrice: 150.0,
-		currentLowestPrice: 142.0,
-		percentageChange: -5.3,
-		lastChecked: new Date('2024-02-06T11:45:00'),
-		priceHistory: [155, 152, 150, 148, 145, 143, 142]
-	}
-];
-
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, platform }) => {
 	// Get user from session
 	const session = locals.session;
 
 	if (!session) {
 		// This shouldn't happen because of auth middleware, but handle gracefully
 		return {
-			trackedEvents: []
+			trackedEvents: [],
+			isDemoMode: false
 		};
 	}
 
-	// In a real app, we would fetch from database:
-	// const db = getDb(platform.env.DB);
-	// const trackedEvents = await db.select()
-	//   .from(trackedEvents)
-	//   .where(eq(trackedEvents.userId, userDbId))
-	//   .all();
+	if (!platform?.env?.DB) {
+		return {
+			trackedEvents: [],
+			isDemoMode: false
+		};
+	}
 
-	// Return mock data for now
+	const db = getDb(platform.env.DB);
+
+	// Get user from database
+	const user = await db.query.users.findFirst({
+		where: eq(users.clerkId, session.userId)
+	});
+
+	if (!user) {
+		return {
+			trackedEvents: [],
+			isDemoMode: false
+		};
+	}
+
+	// Check if demo mode is enabled
+	const demoMode = await isDemoModeEnabled(db, user.id);
+
+	if (demoMode) {
+		// Return mock data
+		const mockEvents = generateMockEvents(5);
+		return {
+			trackedEvents: mockEvents.map((event) => ({
+				id: event.id,
+				eventName: event.name,
+				venue: event.venue,
+				location: event.location,
+				date: event.date,
+				category: event.category,
+				imageUrl: event.imageUrl,
+				section: event.section,
+				targetPrice: event.targetPrice,
+				currentLowestPrice: event.currentPrice,
+				percentageChange: event.percentageChange,
+				lastChecked: event.lastChecked,
+				priceHistory: event.priceHistory,
+				isPaused: event.isPaused
+			})),
+			isDemoMode: true,
+			userName: session.claims.name || session.claims.email || 'User'
+		};
+	}
+
+	// Fetch real tracked events from database
+	const userTrackedEvents = await db
+		.select({
+			id: trackedEvents.id,
+			targetPrice: trackedEvents.targetPrice,
+			section: trackedEvents.section,
+			isPaused: trackedEvents.isPaused,
+			lastNotifiedAt: trackedEvents.lastNotifiedAt,
+			createdAt: trackedEvents.createdAt,
+			eventId: events.id,
+			eventName: events.name,
+			eventVenue: events.venue,
+			eventLocation: events.location,
+			eventDate: events.date,
+			eventCategory: events.category,
+			eventImageUrl: events.imageUrl
+		})
+		.from(trackedEvents)
+		.innerJoin(events, eq(trackedEvents.eventId, events.id))
+		.where(eq(trackedEvents.userId, user.id));
+
+	// Transform to match expected format (would need to fetch prices in real implementation)
+	const formattedEvents = userTrackedEvents.map((te) => ({
+		id: te.id,
+		eventName: te.eventName,
+		venue: te.eventVenue,
+		location: te.eventLocation,
+		date: te.eventDate,
+		category: te.eventCategory,
+		imageUrl:
+			te.eventImageUrl ||
+			'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&h=300&fit=crop',
+		section: te.section || 'Any',
+		targetPrice: te.targetPrice,
+		currentLowestPrice: 0, // TODO: Fetch from price_history
+		percentageChange: 0, // TODO: Calculate from price_history
+		lastChecked: new Date(), // TODO: Get from platform_sources.lastScrapedAt
+		priceHistory: [], // TODO: Fetch from price_history
+		isPaused: te.isPaused
+	}));
+
 	return {
-		trackedEvents: mockTrackedEvents,
+		trackedEvents: formattedEvents,
+		isDemoMode: false,
 		userName: session.claims.name || session.claims.email || 'User'
 	};
 };

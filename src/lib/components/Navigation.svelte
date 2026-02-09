@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
+
+	let { isAdmin = false }: { isAdmin?: boolean } = $props();
 
 	let currentPath = $derived($page.url.pathname);
 
@@ -10,35 +12,54 @@
 		{ path: '/alerts', icon: 'notifications', label: 'Alerts' },
 		{ path: '/settings', icon: 'settings', label: 'Settings' }
 	];
+
+	const adminItem = { path: '/admin', icon: 'admin_panel_settings', label: 'Admin' };
 </script>
 
 <!-- Desktop Sidebar Navigation (hidden on mobile) -->
-<aside class="fixed left-0 top-16 z-40 hidden h-[calc(100vh-4rem)] w-64 border-r border-[#dbdde6] bg-white md:block">
+<aside
+	class="fixed top-16 left-0 z-40 hidden h-[calc(100vh-4rem)] w-64 border-r border-[#dbdde6] bg-white md:block"
+>
 	<nav class="flex flex-col gap-1 p-4">
-		{#each navItems as item}
-			<button
-				type="button"
-				onclick={() => goto(item.path)}
-				class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors {currentPath === item.path
+		{#each navItems as item (item.path)}
+			<a
+				href={resolve(item.path)}
+				data-sveltekit-preload-data
+				class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors {currentPath ===
+				item.path
 					? 'bg-primary/10 text-primary'
 					: 'text-[#616889] hover:bg-[#f0f1f4]'}"
 			>
 				<span class="material-symbols-outlined text-[20px]">{item.icon}</span>
 				<span>{item.label}</span>
-			</button>
+			</a>
 		{/each}
+		{#if isAdmin}
+			<a
+				href={resolve(adminItem.path)}
+				data-sveltekit-preload-data
+				class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors {currentPath.startsWith(
+					adminItem.path
+				)
+					? 'bg-primary/10 text-primary'
+					: 'text-[#616889] hover:bg-[#f0f1f4]'}"
+			>
+				<span class="material-symbols-outlined text-[20px]">{adminItem.icon}</span>
+				<span>{adminItem.label}</span>
+			</a>
+		{/if}
 	</nav>
 </aside>
 
 <!-- Mobile Bottom Navigation (hidden on desktop) -->
 <nav
-	class="fixed bottom-0 left-0 right-0 z-50 border-t border-[#dbdde6] bg-white/80 backdrop-blur-lg md:hidden"
+	class="fixed right-0 bottom-0 left-0 z-50 border-t border-[#dbdde6] bg-white/80 backdrop-blur-lg md:hidden"
 >
-	<div class="flex justify-around px-6 py-4 pb-safe">
-		{#each navItems as item}
-			<button
-				type="button"
-				onclick={() => goto(item.path)}
+	<div class="pb-safe flex justify-around px-6 py-4">
+		{#each navItems as item (item.path)}
+			<a
+				href={resolve(item.path)}
+				data-sveltekit-preload-data
 				class="flex flex-col items-center gap-1 {currentPath === item.path
 					? 'text-primary'
 					: 'text-[#616889]'}"
@@ -52,10 +73,35 @@
 				<span class="text-[10px] {currentPath === item.path ? 'font-bold' : 'font-medium'}">
 					{item.label}
 				</span>
-			</button>
+			</a>
 		{/each}
+		{#if isAdmin}
+			<a
+				href={resolve(adminItem.path)}
+				data-sveltekit-preload-data
+				class="flex flex-col items-center gap-1 {currentPath.startsWith(adminItem.path)
+					? 'text-primary'
+					: 'text-[#616889]'}"
+			>
+				<span
+					class="material-symbols-outlined text-[24px]"
+					style="font-variation-settings: 'FILL' {currentPath.startsWith(adminItem.path)
+						? '1'
+						: '0'};"
+				>
+					{adminItem.icon}
+				</span>
+				<span
+					class="text-[10px] {currentPath.startsWith(adminItem.path) ? 'font-bold' : 'font-medium'}"
+				>
+					{adminItem.label}
+				</span>
+			</a>
+		{/if}
 	</div>
 </nav>
 
 <!-- Home Indicator (mobile only) -->
-<div class="fixed bottom-1 left-1/2 z-[60] h-1 w-32 -translate-x-1/2 rounded-full bg-black/10 md:hidden"></div>
+<div
+	class="fixed bottom-1 left-1/2 z-[60] h-1 w-32 -translate-x-1/2 rounded-full bg-black/10 md:hidden"
+></div>

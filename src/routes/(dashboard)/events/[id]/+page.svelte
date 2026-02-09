@@ -1,13 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
-	import { Switch } from '$lib/components/ui/switch';
-	import BottomNav from '$lib/components/BottomNav.svelte';
+
+	import FilterChip from '$lib/components/shared/FilterChip.svelte';
 	import type { PageData } from './$types';
-	import { Line } from 'svelte-chartjs';
 	import {
 		Chart as ChartJS,
 		Title,
@@ -20,15 +15,24 @@
 		type ChartData,
 		type ChartOptions
 	} from 'chart.js';
+	import { SvelteDate } from 'svelte/reactivity';
 
 	// Register Chart.js components
 	ChartJS.register(Title, Tooltip, Legend, LineElement, LinearScale, PointElement, CategoryScale);
 
 	let { data }: { data: PageData } = $props();
 
+	let chartCanvas: HTMLCanvasElement | undefined = $state();
+	let chartInstance: ChartJS<'line'> | undefined = $state();
+
 	let activeSection = $state('all');
 	let timeRange = $state('1M'); // 1W, 1M, 3M, All
-	let isPaused = $state(data.event.isPaused);
+	let isPaused = $derived(false);
+
+	// Initialize isPaused from data
+	$effect(() => {
+		isPaused = data.event.isPaused;
+	});
 
 	// Filter price history based on time range
 	const filteredPriceHistory = $derived(() => {
@@ -50,7 +54,7 @@
 				break;
 		}
 
-		const cutoffDate = new Date(now);
+		const cutoffDate = new SvelteDate(now);
 		cutoffDate.setDate(cutoffDate.getDate() - daysBack);
 
 		return data.priceHistory.filter((p) => new Date(p.date) >= cutoffDate);
@@ -69,8 +73,8 @@
 				{
 					label: 'Price',
 					data: history.map((p) => p.price),
-					borderColor: 'rgb(59, 130, 246)',
-					backgroundColor: 'rgba(59, 130, 246, 0.1)',
+					borderColor: '#1337ec',
+					backgroundColor: 'rgba(19, 55, 236, 0.1)',
 					tension: 0.4,
 					fill: true
 				}
@@ -98,16 +102,47 @@
 			y: {
 				beginAtZero: false,
 				ticks: {
-					callback: (value) => `$${value}`
+					callback: (value) => `$${value}`,
+					color: '#616889'
+				},
+				grid: {
+					color: '#dbdde6'
 				}
 			},
 			x: {
 				ticks: {
-					maxTicksLimit: 8
+					maxTicksLimit: 8,
+					color: '#616889'
+				},
+				grid: {
+					color: '#dbdde6'
 				}
 			}
 		}
 	};
+
+	// Initialize and update chart
+	onMount(() => {
+		if (chartCanvas) {
+			chartInstance = new ChartJS(chartCanvas, {
+				type: 'line',
+				data: chartData(),
+				options: chartOptions
+			});
+		}
+
+		return () => {
+			chartInstance?.destroy();
+		};
+	});
+
+	// Update chart when data changes
+	$effect(() => {
+		if (chartInstance) {
+			chartInstance.data = chartData();
+			chartInstance.update();
+		}
+	});
 
 	function formatDate(dateString: string) {
 		return new Intl.DateTimeFormat('en-US', {
@@ -127,9 +162,9 @@
 	}
 
 	function getChangeColor(change: number) {
-		if (change < 0) return 'text-green-600 dark:text-green-400';
-		if (change > 0) return 'text-red-600 dark:text-red-400';
-		return 'text-muted-foreground';
+		if (change < 0) return 'text-green-600';
+		if (change > 0) return 'text-red-600';
+		return 'text-[#616889]';
 	}
 
 	function handleShare() {
@@ -152,51 +187,38 @@
 	}
 </script>
 
-<div class="min-h-screen bg-background pb-20 md:pb-8">
+<svelte:head>
+	<title>{data.event.name} - PriceTracker</title>
+</svelte:head>
+
+<div class="min-h-screen bg-[#f6f6f8] pb-20 md:pb-8">
 	<!-- Header -->
-	<div class="border-b bg-card">
-		<div class="container mx-auto px-4 py-4">
+	<div class="border-b border-[#dbdde6] bg-white">
+		<div class="mx-auto max-w-7xl px-4 py-4">
 			<div class="flex items-center justify-between">
-				<Button href="/dashboard" variant="ghost" size="icon">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-5 w-5"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 19l-7-7 7-7"
-						/>
-					</svg>
-				</Button>
-				<Button variant="ghost" size="icon" onclick={handleShare}>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-5 w-5"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-						/>
-					</svg>
-				</Button>
+				<button
+					type="button"
+					href="/dashboard"
+					data-sveltekit-preload-data
+					class="flex items-center justify-center rounded-xl p-2 text-[#111218] transition-colors hover:bg-[#f6f6f8]"
+				>
+					<span class="material-symbols-outlined">arrow_back</span>
+				</button>
+				<button
+					type="button"
+					onclick={handleShare}
+					class="flex items-center justify-center rounded-xl p-2 text-[#111218] transition-colors hover:bg-[#f6f6f8]"
+				>
+					<span class="material-symbols-outlined">share</span>
+				</button>
 			</div>
 		</div>
 	</div>
 
-	<div class="container mx-auto px-4 py-6">
+	<div class="mx-auto max-w-7xl px-4 py-6">
 		<!-- Event Header -->
 		<div class="mb-6">
-			<div class="mb-4 overflow-hidden rounded-lg">
+			<div class="mb-4 overflow-hidden rounded-2xl shadow-sm">
 				<img
 					src={data.event.imageUrl}
 					alt={data.event.name}
@@ -206,212 +228,224 @@
 
 			<div class="flex items-start justify-between gap-4">
 				<div class="flex-1">
-					<h1 class="mb-2 text-2xl font-bold md:text-3xl">{data.event.name}</h1>
-					<div class="space-y-1 text-sm text-muted-foreground">
+					<h1 class="mb-2 text-2xl leading-tight font-black text-[#111218] md:text-3xl">
+						{data.event.name}
+					</h1>
+					<div class="space-y-1 text-sm text-[#616889]">
 						<div class="flex items-center gap-2">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-4 w-4"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-								/>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-								/>
-							</svg>
+							<span class="material-symbols-outlined text-[16px]">location_on</span>
 							{data.event.venue} · {data.event.location}
 						</div>
 						<div class="flex items-center gap-2">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-4 w-4"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-								/>
-							</svg>
+							<span class="material-symbols-outlined text-[16px]">calendar_today</span>
 							{formatDate(data.event.date)}
 						</div>
 					</div>
 				</div>
-				<Badge variant="secondary" class="capitalize">{data.event.category}</Badge>
+				<span
+					class="bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-bold tracking-wider uppercase"
+				>
+					{data.event.category}
+				</span>
 			</div>
 		</div>
 
 		<!-- Section Filters -->
-		<Tabs bind:value={activeSection} class="mb-6">
-			<TabsList class="w-full">
-				<TabsTrigger value="all" class="flex-1">All Sections</TabsTrigger>
-				<TabsTrigger value="floor" class="flex-1">Floor</TabsTrigger>
-				<TabsTrigger value="lowerBowl" class="flex-1">Lower Bowl</TabsTrigger>
-				<TabsTrigger value="upperBowl" class="flex-1">Upper Bowl</TabsTrigger>
-			</TabsList>
-		</Tabs>
+		<div class="mb-6 flex gap-2 overflow-x-auto">
+			<FilterChip active={activeSection === 'all'} onclick={() => (activeSection = 'all')}>
+				All Sections
+			</FilterChip>
+			<FilterChip active={activeSection === 'floor'} onclick={() => (activeSection = 'floor')}>
+				Floor
+			</FilterChip>
+			<FilterChip
+				active={activeSection === 'lowerBowl'}
+				onclick={() => (activeSection = 'lowerBowl')}
+			>
+				Lower Bowl
+			</FilterChip>
+			<FilterChip
+				active={activeSection === 'upperBowl'}
+				onclick={() => (activeSection = 'upperBowl')}
+			>
+				Upper Bowl
+			</FilterChip>
+		</div>
 
 		<!-- Current Price Card -->
-		<Card class="mb-6">
-			<CardContent class="p-6">
-				<div class="flex items-center justify-between">
-					<div>
-						<div class="mb-1 text-sm text-muted-foreground">Current Lowest Price</div>
-						<div class="text-3xl font-bold">
-							{formatPrice(
-								data.event.currentPrices[activeSection as keyof typeof data.event.currentPrices]
-							)}
-						</div>
-					</div>
-					<div class="text-right">
-						<Badge
-							variant={data.event.percentageChange < 0 ? 'default' : 'destructive'}
-							class="mb-2"
-						>
-							{data.event.percentageChange > 0 ? '↑' : '↓'}
-							{Math.abs(data.event.percentageChange).toFixed(1)}%
-						</Badge>
-						<div class={`text-sm font-semibold ${getChangeColor(data.event.priceChange)}`}>
-							{data.event.priceChange < 0 ? '-' : '+'}{formatPrice(
-								Math.abs(data.event.priceChange)
-							)}
-						</div>
+		<div class="mb-6 rounded-2xl border border-[#dbdde6] bg-white p-6 shadow-sm">
+			<div class="flex items-center justify-between">
+				<div>
+					<div class="mb-1 text-sm font-medium text-[#616889]">Current Lowest Price</div>
+					<div class="text-3xl font-black text-[#111218]">
+						{formatPrice(
+							data.event.currentPrices[activeSection as keyof typeof data.event.currentPrices]
+						)}
 					</div>
 				</div>
-			</CardContent>
-		</Card>
+				<div class="text-right">
+					<span
+						class="mb-2 inline-block rounded-full px-2.5 py-1 text-xs font-bold {data.event
+							.percentageChange < 0
+							? 'bg-green-100 text-green-600'
+							: 'bg-red-100 text-red-600'}"
+					>
+						{data.event.percentageChange > 0 ? '↑' : '↓'}
+						{Math.abs(data.event.percentageChange).toFixed(1)}%
+					</span>
+					<div class={`text-sm font-bold ${getChangeColor(data.event.priceChange)}`}>
+						{data.event.priceChange < 0 ? '-' : '+'}{formatPrice(Math.abs(data.event.priceChange))}
+					</div>
+				</div>
+			</div>
+		</div>
 
 		<!-- Price Chart -->
-		<Card class="mb-6">
-			<CardHeader>
-				<div class="flex items-center justify-between">
-					<CardTitle>Price History</CardTitle>
+		<div class="mb-6 rounded-2xl border border-[#dbdde6] bg-white shadow-sm">
+			<div class="border-b border-[#dbdde6] p-6">
+				<div class="flex flex-wrap items-center justify-between gap-4">
+					<h2 class="text-xl font-bold text-[#111218]">Price History</h2>
 					<div class="flex gap-2">
-						<Button
-							variant={timeRange === '1W' ? 'default' : 'outline'}
-							size="sm"
+						<button
+							type="button"
 							onclick={() => (timeRange = '1W')}
+							class="rounded-xl px-4 py-2 text-sm font-bold transition-all {timeRange === '1W'
+								? 'bg-primary text-white shadow-sm'
+								: 'hover:border-primary/30 border border-[#dbdde6] bg-white text-[#111218]'}"
 						>
 							1W
-						</Button>
-						<Button
-							variant={timeRange === '1M' ? 'default' : 'outline'}
-							size="sm"
+						</button>
+						<button
+							type="button"
 							onclick={() => (timeRange = '1M')}
+							class="rounded-xl px-4 py-2 text-sm font-bold transition-all {timeRange === '1M'
+								? 'bg-primary text-white shadow-sm'
+								: 'hover:border-primary/30 border border-[#dbdde6] bg-white text-[#111218]'}"
 						>
 							1M
-						</Button>
-						<Button
-							variant={timeRange === '3M' ? 'default' : 'outline'}
-							size="sm"
+						</button>
+						<button
+							type="button"
 							onclick={() => (timeRange = '3M')}
+							class="rounded-xl px-4 py-2 text-sm font-bold transition-all {timeRange === '3M'
+								? 'bg-primary text-white shadow-sm'
+								: 'hover:border-primary/30 border border-[#dbdde6] bg-white text-[#111218]'}"
 						>
 							3M
-						</Button>
-						<Button
-							variant={timeRange === 'All' ? 'default' : 'outline'}
-							size="sm"
+						</button>
+						<button
+							type="button"
 							onclick={() => (timeRange = 'All')}
+							class="rounded-xl px-4 py-2 text-sm font-bold transition-all {timeRange === 'All'
+								? 'bg-primary text-white shadow-sm'
+								: 'hover:border-primary/30 border border-[#dbdde6] bg-white text-[#111218]'}"
 						>
 							All
-						</Button>
+						</button>
 					</div>
 				</div>
-			</CardHeader>
-			<CardContent>
+			</div>
+			<div class="p-6">
 				<div class="h-64 w-full">
-					<Line data={chartData()} options={chartOptions} />
+					<canvas bind:this={chartCanvas}></canvas>
 				</div>
-			</CardContent>
-		</Card>
+			</div>
+		</div>
 
 		<div class="grid gap-6 md:grid-cols-2">
 			<!-- Tracking Status Card -->
-			<Card>
-				<CardHeader>
-					<CardTitle>Tracking Status</CardTitle>
-				</CardHeader>
-				<CardContent class="space-y-4">
+			<div class="rounded-2xl border border-[#dbdde6] bg-white shadow-sm">
+				<div class="border-b border-[#dbdde6] p-6">
+					<h2 class="text-xl font-bold text-[#111218]">Tracking Status</h2>
+				</div>
+				<div class="space-y-4 p-6">
 					<div class="flex items-center justify-between">
-						<span class="text-sm text-muted-foreground">Status</span>
-						<Badge variant={isPaused ? 'secondary' : 'default'}>
+						<span class="text-sm font-medium text-[#616889]">Status</span>
+						<span
+							class="rounded-full px-2.5 py-1 text-xs font-bold {isPaused
+								? 'bg-gray-100 text-gray-600'
+								: 'bg-green-100 text-green-600'}"
+						>
 							{isPaused ? 'Paused' : 'Active'}
-						</Badge>
+						</span>
 					</div>
 					<div class="flex items-center justify-between">
-						<span class="text-sm text-muted-foreground">Target Price</span>
-						<span class="font-semibold">{formatPrice(data.event.targetPrice)}</span>
+						<span class="text-sm font-medium text-[#616889]">Target Price</span>
+						<span class="font-bold text-[#111218]">{formatPrice(data.event.targetPrice)}</span>
 					</div>
 					<div class="flex items-center justify-between">
-						<span class="text-sm text-muted-foreground">Section</span>
-						<span class="font-semibold">{data.event.section}</span>
+						<span class="text-sm font-medium text-[#616889]">Section</span>
+						<span class="font-bold text-[#111218]">{data.event.section}</span>
 					</div>
 					<div class="flex items-center justify-between">
-						<span class="text-sm text-muted-foreground">Last Checked</span>
-						<span class="text-sm">{formatDate(data.event.lastChecked)}</span>
+						<span class="text-sm font-medium text-[#616889]">Last Checked</span>
+						<span class="text-sm text-[#111218]">{formatDate(data.event.lastChecked)}</span>
 					</div>
 
 					<div class="pt-4">
-						<Button href="/events/{data.event.id}/edit" class="w-full" variant="outline">
+						<button
+							type="button"
+							href={`/events/${data.event.id}/edit`}
+							data-sveltekit-preload-data
+							class="hover:border-primary/30 w-full rounded-xl border border-[#dbdde6] bg-white px-4 py-2.5 text-sm font-bold text-[#111218] shadow-sm transition-all hover:shadow-md"
+						>
 							Edit Alert Settings
-						</Button>
+						</button>
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			<!-- Recent Price Changes -->
-			<Card>
-				<CardHeader>
-					<CardTitle>Recent Price Changes</CardTitle>
-				</CardHeader>
-				<CardContent>
+			<div class="rounded-2xl border border-[#dbdde6] bg-white shadow-sm">
+				<div class="border-b border-[#dbdde6] p-6">
+					<h2 class="text-xl font-bold text-[#111218]">Recent Price Changes</h2>
+				</div>
+				<div class="p-6">
 					<div class="space-y-3">
-						{#each data.recentChanges as change}
-							<div class="flex items-center justify-between border-b pb-3 last:border-0">
+						{#each data.recentChanges as change (change.date)}
+							<div
+								class="flex items-center justify-between border-b border-gray-100 pb-3 last:border-0"
+							>
 								<div class="flex-1">
-									<div class="mb-1 text-sm font-medium">
+									<div class="mb-1 text-sm font-bold text-[#111218]">
 										{formatPrice(change.oldPrice)} → {formatPrice(change.newPrice)}
 									</div>
-									<div class="text-xs text-muted-foreground">
+									<div class="text-xs text-[#616889]">
 										{formatDate(change.date)} · {change.section}
 									</div>
 								</div>
-								<div class={`text-sm font-semibold ${getChangeColor(change.change)}`}>
+								<div class={`text-sm font-bold ${getChangeColor(change.change)}`}>
 									{change.change < 0 ? '' : '+'}{change.percentageChange.toFixed(1)}%
 								</div>
 							</div>
 						{/each}
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 		</div>
 
 		<!-- Pause Notifications -->
-		<Card class="mt-6">
-			<CardContent class="flex items-center justify-between p-6">
+		<div class="mt-6 rounded-2xl border border-[#dbdde6] bg-white shadow-sm">
+			<div class="flex items-center justify-between p-6">
 				<div>
-					<h3 class="font-semibold">Pause Notifications</h3>
-					<p class="text-sm text-muted-foreground">
-						Temporarily stop receiving alerts for this event
-					</p>
+					<h3 class="font-bold text-[#111218]">Pause Notifications</h3>
+					<p class="text-sm text-[#616889]">Temporarily stop receiving alerts for this event</p>
 				</div>
-				<Switch checked={isPaused} onCheckedChange={handleTogglePause} />
-			</CardContent>
-		</Card>
+				<button
+					type="button"
+					onclick={handleTogglePause}
+					aria-label={isPaused ? 'Resume notifications' : 'Pause notifications'}
+					class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {isPaused
+						? 'bg-gray-200'
+						: 'bg-primary'}"
+				>
+					<span
+						class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {isPaused
+							? 'translate-x-1'
+							: 'translate-x-6'}"
+					></span>
+				</button>
+			</div>
+		</div>
 	</div>
 </div>
-
-<BottomNav />

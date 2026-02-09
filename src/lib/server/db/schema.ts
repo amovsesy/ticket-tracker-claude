@@ -1,5 +1,4 @@
 import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
-import { sql } from 'drizzle-orm';
 
 // User tiers enum
 export const userTiers = ['free', 'pro'] as const;
@@ -30,6 +29,7 @@ export const users = sqliteTable('users', {
 	email: text('email').notNull(),
 	phone: text('phone'),
 	tier: text('tier', { enum: userTiers }).notNull().default('free'),
+	isAdmin: integer('is_admin', { mode: 'boolean' }).notNull().default(false),
 	emailNotifications: integer('email_notifications', { mode: 'boolean' }).notNull().default(true),
 	smsNotifications: integer('sms_notifications', { mode: 'boolean' }).notNull().default(false),
 	notificationFrequency: text('notification_frequency', { enum: notificationFrequencies })
@@ -64,7 +64,10 @@ export const events = sqliteTable(
 			.notNull()
 			.$defaultFn(() => new Date())
 	},
-	(table) => [index('idx_events_date').on(table.date), index('idx_events_category').on(table.category)]
+	(table) => [
+		index('idx_events_date').on(table.date),
+		index('idx_events_category').on(table.category)
+	]
 );
 
 /**
@@ -204,6 +207,50 @@ export const scrapingLogs = sqliteTable(
 	]
 );
 
+/**
+ * Admin Audit Logs table - Track all admin actions for security and compliance
+ */
+export const adminAuditLogs = sqliteTable(
+	'admin_audit_logs',
+	{
+		id: integer('id').primaryKey({ autoIncrement: true }),
+		adminUserId: integer('admin_user_id')
+			.notNull()
+			.references(() => users.id),
+		action: text('action').notNull(), // 'view_user', 'edit_event', 'send_notification', etc.
+		targetType: text('target_type'), // 'user', 'event', 'notification'
+		targetId: integer('target_id'), // ID of the affected resource
+		details: text('details'), // JSON string with additional context
+		ipAddress: text('ip_address'),
+		userAgent: text('user_agent'),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [
+		index('idx_admin_audit_admin_user').on(table.adminUserId),
+		index('idx_admin_audit_created_at').on(table.createdAt),
+		index('idx_admin_audit_action').on(table.action)
+	]
+);
+
+/**
+ * User Demo Mode table - Store mock/demo data toggle state per user
+ */
+export const userDemoMode = sqliteTable('user_demo_mode', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	userId: integer('user_id')
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' })
+		.unique(),
+	isEnabled: integer('is_enabled', { mode: 'boolean' }).notNull().default(false),
+	enabledBy: integer('enabled_by').references(() => users.id), // Admin who enabled it
+	enabledAt: integer('enabled_at', { mode: 'timestamp' }),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
 // Export types for use in application
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -225,3 +272,40 @@ export type NewNotification = typeof notifications.$inferInsert;
 
 export type ScrapingLog = typeof scrapingLogs.$inferSelect;
 export type NewScrapingLog = typeof scrapingLogs.$inferInsert;
+
+export type AdminAuditLog = typeof adminAuditLogs.$inferSelect;
+export type NewAdminAuditLog = typeof adminAuditLogs.$inferInsert;
+
+export type UserDemoMode = typeof userDemoMode.$inferSelect;
+export type NewUserDemoMode = typeof userDemoMode.$inferInsert;
+
+// Pricing variants enum
+export const pricingVariants = [
+	'launch_promo',
+	'pay_per_event',
+	'percentage_savings',
+	'pay_per_sms_tips',
+	'tips_only'
+] as const;
+export type PricingVariant = (typeof pricingVariants)[number];
+
+/**
+ * Pricing Configuration table - Stores admin-controlled pricing settings
+ */
+export const pricingConfig = sqliteTable('pricing_config', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	variant: text('variant', { enum: pricingVariants }).notNull().default('launch_promo'),
+	promoEnabled: integer('promo_enabled', { mode: 'boolean' }).notNull().default(true),
+	promoDiscount: integer('promo_discount').notNull().default(100), // 0-100 percentage
+	promoMessage: text('promo_message').default('100% Off Pro Plan - Launch Special'),
+	payPerEventCost: real('pay_per_event_cost').default(0.99),
+	percentageSavings: integer('percentage_savings').default(10), // 0-100 percentage
+	smsPerMessageCost: real('sms_per_message_cost').default(0.05),
+	updatedBy: integer('updated_by').references(() => users.id),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
+export type PricingConfig = typeof pricingConfig.$inferSelect;
+export type NewPricingConfig = typeof pricingConfig.$inferInsert;

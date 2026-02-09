@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import clerkStore from '$lib/components/clerk/store';
 
 	let clerk = $state($clerkStore);
@@ -22,7 +21,7 @@
 	<div class="flex flex-col gap-1">
 		<!-- CHANNELS SECTION -->
 		<h3
-			class="px-0 pb-2 pt-6 text-sm font-semibold uppercase leading-tight tracking-wider text-[#616889]"
+			class="px-0 pt-6 pb-2 text-sm leading-tight font-semibold tracking-wider text-[#616889] uppercase"
 		>
 			Channels
 		</h3>
@@ -32,23 +31,21 @@
 				class="flex min-h-[72px] items-center justify-between gap-4 border-b border-gray-50 px-4 py-2"
 			>
 				<div class="flex items-center gap-4">
-					<div
-						class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#f0f1f4]"
-					>
+					<div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#f0f1f4]">
 						<span class="material-symbols-outlined text-[#111218]">mail</span>
 					</div>
 					<div class="flex flex-col justify-center">
-						<p class="line-clamp-1 text-base font-medium leading-normal text-[#111218]">
+						<p class="line-clamp-1 text-base leading-normal font-medium text-[#111218]">
 							Email Alerts
 						</p>
-						<p class="line-clamp-2 text-sm font-normal leading-normal text-[#616889]">
+						<p class="line-clamp-2 text-sm leading-normal font-normal text-[#616889]">
 							Get price drops in your inbox
 						</p>
 					</div>
 				</div>
 				<div class="shrink-0">
 					<label
-						class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-[#f0f1f4] p-0.5 transition-all duration-200 has-[:checked]:justify-end has-[:checked]:bg-primary"
+						class="has-[:checked]:bg-primary relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-[#f0f1f4] p-0.5 transition-all duration-200 has-[:checked]:justify-end"
 					>
 						<div class="h-full w-[27px] rounded-full bg-white shadow-md"></div>
 						<input bind:checked={emailAlerts} class="invisible absolute" type="checkbox" />
@@ -58,30 +55,28 @@
 			<!-- SMS Alerts -->
 			<div class="flex min-h-[72px] items-center justify-between gap-4 px-4 py-2">
 				<div class="flex items-center gap-4">
-					<div
-						class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#f0f1f4]"
-					>
+					<div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#f0f1f4]">
 						<span class="material-symbols-outlined text-[#111218]">chat_bubble</span>
 					</div>
 					<div class="flex flex-col justify-center">
 						<div class="flex items-center gap-2">
-							<p class="line-clamp-1 text-base font-medium leading-normal text-[#111218]">
+							<p class="line-clamp-1 text-base leading-normal font-medium text-[#111218]">
 								SMS Alerts
 							</p>
 							<span
-								class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700"
+								class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-amber-700 uppercase"
 							>
 								Premium
 							</span>
 						</div>
-						<p class="line-clamp-2 text-sm font-medium leading-normal text-primary">
+						<p class="text-primary line-clamp-2 text-sm leading-normal font-medium">
 							Free during Launch
 						</p>
 					</div>
 				</div>
 				<div class="shrink-0">
 					<label
-						class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-[#f0f1f4] p-0.5 transition-all duration-200 has-[:checked]:justify-end has-[:checked]:bg-primary"
+						class="has-[:checked]:bg-primary relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-[#f0f1f4] p-0.5 transition-all duration-200 has-[:checked]:justify-end"
 					>
 						<div class="h-full w-[27px] rounded-full bg-white shadow-md"></div>
 						<input bind:checked={smsAlerts} class="invisible absolute" type="checkbox" />
@@ -92,7 +87,7 @@
 
 		<!-- FREQUENCY SECTION -->
 		<h3
-			class="px-0 pb-2 pt-6 text-sm font-semibold uppercase leading-tight tracking-wider text-[#616889]"
+			class="px-0 pt-6 pb-2 text-sm leading-tight font-semibold tracking-wider text-[#616889] uppercase"
 		>
 			Frequency
 		</h3>
@@ -102,8 +97,8 @@
 				class="flex min-h-[64px] items-center justify-between gap-4 border-b border-gray-50 px-4 py-2"
 			>
 				<div class="flex flex-col justify-center">
-					<p class="text-base font-medium leading-normal text-[#111218]">Real-time</p>
-					<p class="text-sm font-normal leading-normal text-[#616889]">
+					<p class="text-base leading-normal font-medium text-[#111218]">Real-time</p>
+					<p class="text-sm leading-normal font-normal text-[#616889]">
 						Instantly when prices drop
 					</p>
 				</div>
@@ -111,7 +106,7 @@
 					<input
 						bind:group={frequency}
 						value="realtime"
-						class="size-5 border-gray-300 text-primary focus:ring-primary"
+						class="text-primary focus:ring-primary size-5 border-gray-300"
 						name="frequency"
 						type="radio"
 					/>
@@ -120,8 +115,8 @@
 			<!-- Daily Digest -->
 			<div class="flex min-h-[64px] items-center justify-between gap-4 px-4 py-2">
 				<div class="flex flex-col justify-center">
-					<p class="text-base font-medium leading-normal text-[#111218]">Daily Digest</p>
-					<p class="text-sm font-normal leading-normal text-[#616889]">
+					<p class="text-base leading-normal font-medium text-[#111218]">Daily Digest</p>
+					<p class="text-sm leading-normal font-normal text-[#616889]">
 						Summary of changes once a day
 					</p>
 				</div>
@@ -129,7 +124,7 @@
 					<input
 						bind:group={frequency}
 						value="daily"
-						class="size-5 border-gray-300 text-primary focus:ring-primary"
+						class="text-primary focus:ring-primary size-5 border-gray-300"
 						name="frequency"
 						type="radio"
 					/>
@@ -139,7 +134,7 @@
 
 		<!-- CONTACT INFO SECTION -->
 		<h3
-			class="px-0 pb-2 pt-6 text-sm font-semibold uppercase leading-tight tracking-wider text-[#616889]"
+			class="px-0 pt-6 pb-2 text-sm leading-tight font-semibold tracking-wider text-[#616889] uppercase"
 		>
 			Contact Information
 		</h3>
@@ -149,7 +144,7 @@
 				class="flex min-h-[64px] cursor-pointer items-center justify-between gap-4 border-b border-gray-50 px-4 py-2"
 			>
 				<div class="flex flex-col justify-center">
-					<p class="text-xs font-semibold uppercase text-[#616889]">Email Address</p>
+					<p class="text-xs font-semibold text-[#616889] uppercase">Email Address</p>
 					<p class="text-base font-medium text-[#111218]">
 						{user?.primaryEmailAddress?.emailAddress || 'Not set'}
 					</p>
@@ -160,10 +155,8 @@
 			<div class="flex min-h-[64px] cursor-pointer items-center justify-between gap-4 px-4 py-2">
 				<div class="flex flex-col justify-center">
 					<div class="flex items-center gap-2">
-						<p class="text-xs font-semibold uppercase text-[#616889]">Phone Number</p>
-						<span
-							class="rounded bg-red-50 px-1 text-[9px] font-bold uppercase text-red-600"
-						>
+						<p class="text-xs font-semibold text-[#616889] uppercase">Phone Number</p>
+						<span class="rounded bg-red-50 px-1 text-[9px] font-bold text-red-600 uppercase">
 							Unverified
 						</span>
 					</div>
@@ -175,22 +168,22 @@
 			</div>
 		</div>
 
-		<div class="px-0 pb-12 pt-4">
+		<div class="px-0 pt-4 pb-12">
 			<p class="text-center text-xs leading-relaxed text-[#616889]">
-				Message and data rates may apply. SMS alerts are currently available for US and Canada
-				phone numbers only.
+				Message and data rates may apply. SMS alerts are currently available for US and Canada phone
+				numbers only.
 			</p>
 		</div>
 	</div>
 
 	<!-- Sticky Save Button -->
 	<div
-		class="fixed bottom-0 left-1/2 w-full max-w-7xl -translate-x-1/2 border-t border-gray-100 bg-white/80 p-4 backdrop-blur-md md:left-auto md:right-0 md:max-w-[calc(100%-16rem)] md:translate-x-0"
+		class="fixed bottom-0 left-1/2 w-full max-w-7xl -translate-x-1/2 border-t border-gray-100 bg-white/80 p-4 backdrop-blur-md md:right-0 md:left-auto md:max-w-[calc(100%-16rem)] md:translate-x-0"
 	>
 		<button
 			type="button"
 			onclick={() => alert('Settings saved!')}
-			class="w-full rounded-xl bg-primary py-4 font-bold text-white shadow-lg transition-all hover:bg-primary/90 active:scale-[0.98]"
+			class="bg-primary hover:bg-primary/90 w-full rounded-xl py-4 font-bold text-white shadow-lg transition-all active:scale-[0.98]"
 		>
 			Save Changes
 		</button>

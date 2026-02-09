@@ -59,7 +59,7 @@ const recentChanges = [
 	}
 ];
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async ({ params }) => {
 	const eventId = params.id;
 
 	// In a real app, fetch from database

@@ -10,3 +10,5 @@ worker-configuration.d.ts
 # Miscellaneous
 /static/
 /drizzle/
+/.agents/
+/.claude/

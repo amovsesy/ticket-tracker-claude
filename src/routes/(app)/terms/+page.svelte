@@ -31,14 +31,17 @@
 			<section>
 				<h2 class="mb-3 text-2xl font-bold text-[#111218]">Agreement to Terms</h2>
 				<p class="mb-2 text-[#111218]">
-					By accessing or using PriceTracker ("Service"), you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access the Service.
+					By accessing or using PriceTracker ("Service"), you agree to be bound by these Terms of
+					Service. If you disagree with any part of these terms, you may not access the Service.
 				</p>
 			</section>
 
 			<section>
 				<h2 class="mb-3 text-2xl font-bold text-[#111218]">Description of Service</h2>
 				<p class="mb-2 text-[#111218]">
-					PriceTracker provides price monitoring and notification services for event tickets from various platforms including Ticketmaster, StubHub, and SeatGeek. We track price changes and alert users when prices drop below their specified thresholds.
+					PriceTracker provides price monitoring and notification services for event tickets from
+					various platforms including Ticketmaster, StubHub, and SeatGeek. We track price changes
+					and alert users when prices drop below their specified thresholds.
 				</p>
 			</section>
 
@@ -78,28 +81,37 @@
 			<section>
 				<h2 class="mb-3 text-2xl font-bold text-[#111218]">Data Accuracy</h2>
 				<p class="text-[#111218]">
-					While we strive to provide accurate price information, we cannot guarantee the accuracy, completeness, or timeliness of price data. Prices shown on third-party ticket platforms may differ from our tracked prices. Always verify pricing directly with the ticket vendor before making a purchase.
+					While we strive to provide accurate price information, we cannot guarantee the accuracy,
+					completeness, or timeliness of price data. Prices shown on third-party ticket platforms
+					may differ from our tracked prices. Always verify pricing directly with the ticket vendor
+					before making a purchase.
 				</p>
 			</section>
 
 			<section>
 				<h2 class="mb-3 text-2xl font-bold text-[#111218]">Limitation of Liability</h2>
 				<p class="text-[#111218]">
-					PriceTracker shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the Service. We do not guarantee that the Service will be uninterrupted, timely, or error-free.
+					PriceTracker shall not be liable for any indirect, incidental, special, consequential, or
+					punitive damages resulting from your use of or inability to use the Service. We do not
+					guarantee that the Service will be uninterrupted, timely, or error-free.
 				</p>
 			</section>
 
 			<section>
 				<h2 class="mb-3 text-2xl font-bold text-[#111218]">Termination</h2>
 				<p class="text-[#111218]">
-					We reserve the right to terminate or suspend your account and access to the Service immediately, without prior notice, for conduct that we believe violates these Terms of Service or is harmful to other users, us, or third parties.
+					We reserve the right to terminate or suspend your account and access to the Service
+					immediately, without prior notice, for conduct that we believe violates these Terms of
+					Service or is harmful to other users, us, or third parties.
 				</p>
 			</section>
 
 			<section>
 				<h2 class="mb-3 text-2xl font-bold text-[#111218]">Changes to Terms</h2>
 				<p class="text-[#111218]">
-					We reserve the right to modify these terms at any time. We will notify users of significant changes via email or through the Service. Your continued use of the Service after changes constitutes acceptance of the modified terms.
+					We reserve the right to modify these terms at any time. We will notify users of
+					significant changes via email or through the Service. Your continued use of the Service
+					after changes constitutes acceptance of the modified terms.
 				</p>
 			</section>
 
@@ -107,7 +119,11 @@
 				<h2 class="mb-3 text-2xl font-bold text-[#111218]">Contact</h2>
 				<p class="text-[#111218]">
 					For questions about these Terms of Service, contact us at
-					<a href="mailto:legal@pricetracker.com" class="text-primary hover:underline">
+					<a
+						href="mailto:legal@pricetracker.com"
+						data-sveltekit-preload-data
+						class="text-primary hover:underline"
+					>
 						legal@pricetracker.com
 					</a>.
 				</p>

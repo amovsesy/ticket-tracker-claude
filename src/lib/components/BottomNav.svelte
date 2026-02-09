@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
 
 	// Check if current route matches the given path
 	function isActive(path: string) {
@@ -31,11 +32,12 @@
 </script>
 
 <!-- Bottom Navigation (Mobile only) -->
-<nav class="fixed bottom-0 left-0 right-0 z-50 border-t bg-card md:hidden">
+<nav class="bg-card fixed right-0 bottom-0 left-0 z-50 border-t md:hidden">
 	<div class="flex items-center justify-around py-2">
-		{#each navItems as item}
+		{#each navItems as item (item.path)}
 			<a
-				href={item.path}
+				href={resolve(item.path)}
+				data-sveltekit-preload-data
 				class="flex flex-col items-center gap-1 px-3 py-2 transition-colors {isActive(item.path)
 					? 'text-primary'
 					: 'text-muted-foreground hover:text-foreground'}"
@@ -47,6 +49,7 @@
 					viewBox="0 0 24 24"
 					stroke="currentColor"
 				>
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html item.icon}
 				</svg>
 				<span class="text-xs font-medium">{item.label}</span>

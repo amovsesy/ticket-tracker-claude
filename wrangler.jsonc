@@ -26,7 +26,16 @@
 			"database_name": "ticket-tracker-db",
 			"database_id": "4977eff9-96f2-44d2-bc62-ca13ad6486d9"
 		}
-	]
+	],
+	/**
+	 * Cron Triggers
+	 * https://developers.cloudflare.com/workers/configuration/crons/
+	 */
+	"triggers": {
+		"crons": [
+			"*/15 * * * *"
+		]
+	}
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
